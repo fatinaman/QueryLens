@@ -2,12 +2,13 @@
 
 ## Current milestone
 
-**Milestones 7–11:** React frontend, schema editor, interactive diagram, API
-integration, and responsive styling
+**Milestones 12–13:** Frontend automated tests, production containers, Docker
+Compose, and continuous integration
 
 ## Current status
 
-**Implementation complete; manual browser verification pending**
+**Implementation complete; Docker runtime verification pending where Docker is
+unavailable**
 
 ## Established technical decisions
 
@@ -22,6 +23,16 @@ integration, and responsive styling
 - Use plain CSS for the MVP.
 - Require Node.js 24 and npm 11 for frontend development.
 - Use React 19, TypeScript 6, Vite 8, and `@xyflow/react` 12.
+- Use Vitest 4 with React Testing Library, jest-dom, user-event, and jsdom for
+  behavior-focused frontend tests.
+- Avoid snapshot tests, real timers, and implementation-detail assertions.
+- Build the backend in a multi-stage Java 21 image and run it as a non-root
+  user.
+- Build the frontend with Node 24 and serve immutable static assets through
+  nginx with SPA fallback.
+- Run the two applications through Docker Compose without a database.
+- Run Java 21 backend checks, Node 24 frontend checks, and both image builds in
+  GitHub Actions without publishing or deployment.
 - Keep the frontend API base URL configurable through `VITE_API_BASE_URL`,
   falling back to `http://localhost:8080`.
 - Validate success and error response bodies at the frontend network boundary.
@@ -80,8 +91,9 @@ QueryLens/
 └── README.md
 ```
 
-The `frontend` directory contains the React application. The otherwise empty
-`.github/workflows` directory remains reserved for a later CI milestone.
+The `frontend` directory contains the React application and nginx container.
+The backend has its own Java container. `.github/workflows/ci.yml` verifies
+both applications and images.
 
 ## Milestone history
 
@@ -93,11 +105,13 @@ The `frontend` directory contains the React application. The otherwise empty
 | Milestone 4 | Complete | Implemented the PostgreSQL `CREATE TABLE` parser for the documented MVP subset. |
 | Milestone 5 | Complete | Added the schema service, REST endpoint, structured exception handling, configurable CORS, and API documentation. |
 | Milestone 6 | Complete | Added service, controller, integration, CORS, and error-contract tests; all 47 backend tests pass. |
-| Milestone 7 | Implemented; browser QA pending | Initialized a React 19 and TypeScript frontend with Vite 8, Node 24 tooling, and React Flow. |
-| Milestone 8 | Implemented; browser QA pending | Added the accessible SQL editor, example schema, clear action, character limit, and keyboard submission. |
-| Milestone 9 | Implemented; browser QA pending | Added custom table nodes, foreign-key edges, deterministic layout, controls, minimap, dragging, and empty state. |
-| Milestone 10 | Implemented; browser QA pending | Integrated the parsing API with cancellation, loading state, runtime response validation, and safe error feedback. |
-| Milestone 11 | Implemented; browser QA pending | Added the responsive split layout, mobile stacking, restrained visual styling, and frontend documentation. |
+| Milestone 7 | Complete | Initialized a React 19 and TypeScript frontend with Vite 8, Node 24 tooling, and React Flow. |
+| Milestone 8 | Complete | Added the accessible SQL editor, example schema, clear action, character limit, and keyboard submission. |
+| Milestone 9 | Complete | Added custom table nodes, foreign-key edges, deterministic layout, controls, minimap, dragging, and empty state. |
+| Milestone 10 | Complete | Integrated the parsing API with cancellation, loading state, runtime response validation, and safe error feedback. |
+| Milestone 11 | Complete | Added the responsive split layout, mobile stacking, restrained visual styling, and frontend documentation. |
+| Milestone 12 | Complete | Added deterministic behavior-focused frontend coverage for the network, editor, diagram, node, and application layers. |
+| Milestone 13 | Implemented; Docker runtime verification pending | Added production containers, Docker Compose, and a no-deployment GitHub Actions pipeline. |
 
 ## Outcome of Milestone 1
 
@@ -180,7 +194,8 @@ The `frontend` directory contains the React application. The otherwise empty
 - Scaffolded the frontend with Node.js 24.18.0 and npm 11.16.0.
 - Installed React 19.2.8, React DOM 19.2.8, TypeScript 6.0.3, Vite 8.1.5,
   and `@xyflow/react` 12.11.2.
-- Added no frontend test framework.
+- Initially added no frontend test framework; Milestone 12 later introduced the
+  dedicated test toolchain.
 - Added typed API DTOs and a fetch client with a configurable base URL,
   request cancellation, structured backend errors, network guidance, and
   complete runtime response validation.
@@ -197,15 +212,46 @@ The `frontend` directory contains the React application. The otherwise empty
   a hidden minimap where horizontal space is limited.
 - Verified frontend lint and the production build with Node.js 24.
 - Re-ran all 47 backend tests on Java 21 with zero failures, errors, or skips.
-- Started both local applications and verified their health and API
-  integration. Interactive browser QA could not run because this session had
-  no connected browser.
-- Added no Docker, CI, deployment, or hosting configuration.
+- Started both local applications and verified their health, API integration,
+  and browser behavior.
+- Initially added no Docker, CI, deployment, or hosting configuration.
+
+## Outcome of Milestone 12
+
+- Added Vitest 4, React Testing Library, jest-dom, user-event, and jsdom.
+- Added strict TypeScript-aware test configuration and deterministic shared
+  fixtures.
+- Covered API request construction, response validation, structured backend
+  failures, malformed responses, network errors, and abort propagation.
+- Covered editor accessibility, limits, actions, loading behavior, and
+  keyboard submission.
+- Covered deterministic grid placement, directed foreign-key edges, missing
+  referenced tables, unique relationships, and punctuation-safe IDs.
+- Covered custom node column ordering, textual PK/FK indicators, nullability,
+  and connection handles.
+- Covered application empty, loading, success, structured-error, network,
+  cancellation, clear, and last-successful-diagram behavior.
+- Added no snapshots, arbitrary waits, or production behavior changes.
+- Verified 31 frontend tests across 6 files with zero failures.
+
+## Outcome of Milestone 13
+
+- Added a multi-stage Java 21 backend image that runs Maven tests during build
+  and executes as a dedicated non-root runtime user.
+- Added a multi-stage Node 24 frontend image and nginx configuration with SPA
+  fallback, gzip, immutable asset caching, and no-cache HTML.
+- Added focused Docker ignore files to reduce build contexts.
+- Added Docker Compose for the backend on port 8080 and frontend on port 3000,
+  including the correct CORS and frontend API settings.
+- Added GitHub Actions jobs for Java 21 backend tests, Node 24 install/lint/test/
+  build checks, and dependent backend/frontend image builds.
+- Added no deployment, registry publication, secrets, database, or cloud
+  configuration.
+- Docker syntax and build intent were inspected locally; runtime build and
+  Compose startup remain pending on a machine with Docker.
 
 ## Next milestone
 
-**Milestones 12–13 — frontend tests, backend Docker image, and GitHub Actions
-CI**
+**Milestone 14 — deployment**
 
-The next milestones will add focused frontend tests, package the backend in a
-Docker image, and add CI. They have not started.
+Deployment has not started and remains outside the current engineering scope.

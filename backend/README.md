@@ -1,164 +1,132 @@
 # QueryLens Backend
 
-The QueryLens backend is a minimal Spring Boot application that will eventually
-accept PostgreSQL schema definitions and return data for an interactive ER
-diagram.
+The backend is a stateless Java 21 and Spring Boot 4.1 service that parses a
+supported subset of PostgreSQL DDL into the DTO contract consumed by the
+QueryLens frontend.
 
-## Current status
+## Architecture
 
-Milestones 2–4 are complete and Milestones 5–6 are in progress while the
-current work remains uncommitted. The runnable backend, immutable API DTO
-contract, SQL parser, service, REST endpoint, centralized error handling, and
-configurable CORS now exist. No database integration is required.
+- `controller/SchemaController` validates HTTP requests.
+- `service/SchemaService` coordinates schema parsing.
+- `parser/SchemaParser` defines the parser boundary.
+- `parser/JSqlSchemaParser` uses JSqlParser 5.3.
+- `exception/GlobalExceptionHandler` returns safe structured errors.
+- `config/CorsConfig` applies configurable CORS to `/api/**`.
 
-## API DTO contract
+The service has no repository layer or database because requests are parsed
+entirely in memory.
 
-DTOs are Java records organized under `com.querylens.backend.dto`:
-
-- `request` contains `SchemaParseRequest`.
-- `response` contains table, column, foreign-key, and schema response records.
-- `error` contains `ApiErrorResponse`.
-
-The future request body will contain an `sql` string. Bean Validation rejects
-blank SQL and payloads longer than 100,000 characters. A future successful
-response will contain a `tables` list with columns and foreign keys; a future
-error response will contain a message and list of errors.
-
-The DTO contract is exposed by `POST /api/schema/parse`.
-
-## SQL parser
-
-The parser uses JSqlParser 5.3 and is organized under
-`com.querylens.backend.parser`:
-
-- `SchemaParser` defines the `parse(String sql)` contract.
-- `JSqlSchemaParser` is the Spring component that interprets JSqlParser's
-  syntax tree and returns the existing response DTOs.
-- `exception/SchemaParsingException` wraps parsing and structural failures
-  without exposing JSqlParser exceptions from the parser API.
-
-The MVP parser supports multiple `CREATE TABLE` statements, common PostgreSQL
-data types and type arguments, nullability, inline and table-level primary
-keys, named constraints, inline and table-level foreign keys, composite keys,
-forward references, and schema-qualified table names. Declaration ordering is
-preserved.
-
-It rejects non-`CREATE TABLE` statements, malformed SQL, duplicate tables or
-columns, unknown primary-key or foreign-key source columns, and mismatched
-composite foreign keys.
-
-Advanced PostgreSQL features are not intentionally supported, including
-`ALTER TABLE` constraints, `CREATE TABLE AS SELECT`, table inheritance,
-partitioning, generated-column analysis, complex check constraints, storage
-parameters, identity behavior analysis, and referential-action modeling.
-
-The parser is exposed only through the schema parsing endpoint.
-
-## Backend layers
-
-- `controller/SchemaController` accepts and validates JSON requests.
-- `service/SchemaService` delegates SQL strings to `SchemaParser`.
-- `exception/GlobalExceptionHandler` produces safe structured API errors.
-- `config/CorsConfig` configures CORS for `/api/**`.
-
-## Endpoint
+## API
 
 ```http
 POST /api/schema/parse
 Content-Type: application/json
 ```
 
-Example request:
-
 ```json
 {
   "sql": "CREATE TABLE users (id BIGSERIAL PRIMARY KEY);"
 }
 ```
 
-Validation and parsing failures return HTTP 400:
+Validation and parser failures return HTTP 400 with a stable error shape:
 
 ```json
 {
   "message": "Unable to parse SQL schema",
-  "errors": [
-    "Only CREATE TABLE statements are supported"
-  ]
+  "errors": ["Only CREATE TABLE statements are supported"]
 }
 ```
 
-See [the API documentation](../docs/API.md) for complete response examples and
-status codes.
+See [the complete API documentation](../docs/API.md) for success responses,
+status codes, validation limits, and examples.
 
 ## Prerequisites
 
-- A Java 21 JDK
-- Windows PowerShell
+- Java Development Kit 21
+- PowerShell, Command Prompt, or a POSIX shell
 
-Maven does not need to be installed globally because the repository includes
-the Maven Wrapper.
+Global Maven installation is unnecessary; use `mvnw.cmd` on Windows or
+`./mvnw` on POSIX systems.
 
-## Run the backend
+## Local development
 
-From Windows PowerShell:
+PowerShell:
 
 ```powershell
 Set-Location 'G:\projects for github\QueryLens\backend'
 .\mvnw.cmd spring-boot:run
 ```
 
-The backend listens on port `8080` by default. Set the `SERVER_PORT`
-environment variable to override it.
-
-Browsing to `http://localhost:8080` may return the default 404 response because
-there is no root endpoint. The application endpoint is
-`POST http://localhost:8080/api/schema/parse`.
+The default API address is `http://localhost:8080/api/schema/parse`. A browser
+GET request to `/` returns 404 because QueryLens intentionally exposes no root
+endpoint.
 
 ## Environment variables
 
-- `SERVER_PORT` changes the default port from `8080`.
-- `ALLOWED_ORIGINS` accepts one or more comma-separated CORS origins and
-  defaults to `http://localhost:5173`.
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `SERVER_PORT` | `8080` | HTTP listener port |
+| `ALLOWED_ORIGINS` | `http://localhost:5173` | Comma-separated allowed frontend origins |
 
-CORS applies only to `/api/**`, permits `POST` and `OPTIONS`, and does not allow
-credentials.
+CORS permits `POST` and `OPTIONS` for `/api/**`, permits the `Content-Type`
+header, and does not permit credentials.
 
-## Run the tests
+## Testing
+
+Run the complete suite:
 
 ```powershell
-Set-Location 'G:\projects for github\QueryLens\backend'
-.\mvnw.cmd test
+.\mvnw.cmd clean test
 ```
 
-Run only the parser tests with:
+Run focused groups:
 
 ```powershell
-Set-Location 'G:\projects for github\QueryLens\backend'
 .\mvnw.cmd -Dtest=JSqlSchemaParserTest,SchemaParsingExceptionTest test
-```
-
-Run the service and controller tests with:
-
-```powershell
 .\mvnw.cmd -Dtest=SchemaServiceTest,SchemaControllerTest test
 ```
 
-## PowerShell API request
+The suite contains DTO, parser, service, controller, CORS, error-contract, and
+full-context integration coverage.
+
+## Docker
+
+Build from the repository root:
 
 ```powershell
-@'
-{
-  "sql": "CREATE TABLE users (id BIGSERIAL PRIMARY KEY);"
-}
-'@ | Set-Content -Encoding utf8 request.json
-
-curl.exe `
-  -X POST `
-  -H "Content-Type: application/json" `
-  --data-binary "@request.json" `
-  http://localhost:8080/api/schema/parse
-
-Remove-Item request.json
+docker build -t querylens-backend ./backend
+docker run --rm -p 8080:8080 `
+  -e ALLOWED_ORIGINS=http://localhost:3000 `
+  querylens-backend
 ```
 
-The backend requires no database.
+The multi-stage Dockerfile:
+
+- uses Java 21 for build and runtime,
+- resolves dependencies through the Maven Wrapper,
+- runs `clean package`, including all tests,
+- copies only the application JAR into the runtime stage,
+- and runs the application as a dedicated non-root user.
+
+## Troubleshooting
+
+- Confirm `java -version` reports 21 when Maven reports a release mismatch.
+- Set `ALLOWED_ORIGINS` to the exact scheme, host, and port shown in the
+  browser when CORS fails.
+- Check whether port 8080 is already occupied when startup reports a bind
+  failure.
+- Maven Wrapper downloads require internet access on the first run.
+
+## Supported subset and limitations
+
+The parser supports multiple `CREATE TABLE` statements, common PostgreSQL
+types and arguments, nullability, inline and table-level primary and foreign
+keys, named and composite constraints, forward references, and
+schema-qualified names.
+
+It intentionally rejects or does not analyze advanced features such as
+non-`CREATE TABLE` statements, `ALTER TABLE` constraints,
+`CREATE TABLE AS SELECT`, inheritance, partitioning, generated-column
+semantics, storage parameters, complex checks, identity behavior, and
+referential actions.
