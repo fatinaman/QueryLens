@@ -61,3 +61,7 @@ playwright-report/
 # Build and deployment tooling
 .vercel/
 .wrangler/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example
