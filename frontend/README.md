@@ -99,6 +99,31 @@ The multi-stage build uses Node 24 and `npm ci`, then serves only the Vite
 output from nginx. nginx provides SPA fallback, long-lived immutable caching
 for hashed assets, no-cache HTML behavior, and gzip compression.
 
+## Cloudflare Pages deployment
+
+Connect the GitHub repository to Cloudflare Pages with:
+
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Root directory | `frontend` |
+| Build command | `npm ci && npm run build` |
+| Build output directory | `dist` |
+
+Set the production build variable:
+
+```text
+VITE_API_BASE_URL=https://<YOUR-RENDER-BACKEND-DOMAIN>
+```
+
+Vite injects this value at build time. Changing it requires a new Pages
+deployment. All variables prefixed with `VITE_` are visible in browser code,
+so they must never contain secrets or private credentials.
+
+Cloudflare's Git integration can automatically rebuild the frontend after
+pushes to `main`. No Worker, Function, Wrangler configuration, or deployment
+token is required. See [the deployment guide](../docs/DEPLOYMENT.md).
+
 ## Current behavior
 
 - Standard textarea with a 100,000-character limit and `Ctrl+Enter`.
@@ -121,6 +146,10 @@ for hashed assets, no-cache HTML behavior, and gzip compression.
   CORS errors.
 - Rebuild the image after changing `VITE_API_BASE_URL`; it is a build-time
   value.
+- In production, confirm `VITE_API_BASE_URL` uses HTTPS and Render
+  `ALLOWED_ORIGINS` exactly matches the Pages origin.
+- Inspect both the Cloudflare build log and browser console when a public
+  deployment reports network, CORS, or mixed-content errors.
 
 ## Limitations
 

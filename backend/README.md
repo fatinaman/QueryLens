@@ -66,11 +66,16 @@ endpoint.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `SERVER_PORT` | `8080` | HTTP listener port |
-| `ALLOWED_ORIGINS` | `http://localhost:5173` | Comma-separated allowed frontend origins |
+| `PORT` | unset | Provider-supplied HTTP port; highest precedence |
+| `SERVER_PORT` | `8080` | Local HTTP port fallback |
+| `ALLOWED_ORIGINS` | Local Vite origin | Allowed frontend origins |
 
 CORS permits `POST` and `OPTIONS` for `/api/**`, permits the `Content-Type`
 header, and does not permit credentials.
+
+The effective port is resolved as `PORT`, then `SERVER_PORT`, then `8080`.
+Spring Boot retains its normal external host binding; it is not restricted to
+localhost. The exact local CORS default is `http://localhost:5173`.
 
 ## Testing
 
@@ -108,6 +113,32 @@ The multi-stage Dockerfile:
 - runs `clean package`, including all tests,
 - copies only the application JAR into the runtime stage,
 - and runs the application as a dedicated non-root user.
+
+The same image works locally and on Render. Locally, omit `PORT` and publish
+container port 8080. On Render, do not manually set `PORT`; Render supplies it
+and Spring Boot uses it automatically.
+
+## Render deployment
+
+QueryLens is prepared for a Render Docker Web Service through the repository
+root `render.yaml`. It uses `backend` as the Docker context, runs the Maven
+tests during the image build, and requires no database or persistent disk.
+
+Production CORS must contain the exact Cloudflare Pages origin:
+
+```text
+ALLOWED_ORIGINS=https://<YOUR-CLOUDFLARE-PAGES-DOMAIN>
+```
+
+Multiple explicit origins remain supported:
+
+```text
+ALLOWED_ORIGINS=https://<YOUR-CLOUDFLARE-PAGES-DOMAIN>,http://localhost:5173
+```
+
+Never use a wildcard production origin. See
+[the deployment guide](../docs/DEPLOYMENT.md) for Blueprint and manual Render
+instructions.
 
 ## Troubleshooting
 

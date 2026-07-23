@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: querylens-api
+    runtime: docker
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeployTrigger: commit
+    envVars:
+      # Enter the exact Cloudflare Pages production origin in the dashboard.
+      - key: ALLOWED_ORIGINS
+        sync: false

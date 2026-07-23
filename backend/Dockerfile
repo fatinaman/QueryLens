@@ -20,4 +20,4 @@ COPY --from=build --chown=querylens:querylens \
 
 USER querylens
 EXPOSE 8080
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/querylens-backend.jar"]
+ENTRYPOINT ["sh", "-c", "exec java -XX:MaxRAMPercentage=75.0 -Dserver.port=${PORT:-${SERVER_PORT:-8080}} -jar /app/querylens-backend.jar"]

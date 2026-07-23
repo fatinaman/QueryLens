@@ -2,13 +2,11 @@
 
 ## Current milestone
 
-**Milestones 12–13:** Frontend automated tests, production containers, Docker
-Compose, and continuous integration
+**Milestone 14:** Free public deployment preparation
 
 ## Current status
 
-**Implementation complete; Docker runtime verification pending where Docker is
-unavailable**
+**Implemented — external dashboard deployment pending**
 
 ## Established technical decisions
 
@@ -33,6 +31,11 @@ unavailable**
 - Run the two applications through Docker Compose without a database.
 - Run Java 21 backend checks, Node 24 frontend checks, and both image builds in
   GitHub Actions without publishing or deployment.
+- Target Render Web Service for the backend and Cloudflare Pages for the
+  frontend through provider-native GitHub integration.
+- Resolve the backend port in `PORT`, `SERVER_PORT`, then `8080` precedence.
+- Keep production origins dashboard-configured rather than committed.
+- Treat `VITE_API_BASE_URL` as a public, build-time frontend value.
 - Keep the frontend API base URL configurable through `VITE_API_BASE_URL`,
   falling back to `http://localhost:8080`.
 - Validate success and error response bodies at the frontend network boundary.
@@ -112,6 +115,7 @@ both applications and images.
 | Milestone 11 | Complete | Added the responsive split layout, mobile stacking, restrained visual styling, and frontend documentation. |
 | Milestone 12 | Complete | Added deterministic behavior-focused frontend coverage for the network, editor, diagram, node, and application layers. |
 | Milestone 13 | Implemented; Docker runtime verification pending | Added production containers, Docker Compose, and a no-deployment GitHub Actions pipeline. |
+| Milestone 14 | Implemented — external dashboard deployment pending | Added Render and Cloudflare Pages deployment preparation, provider configuration, and production QA documentation. |
 
 ## Outcome of Milestone 1
 
@@ -250,8 +254,32 @@ both applications and images.
 - Docker syntax and build intent were inspected locally; runtime build and
   Compose startup remain pending on a machine with Docker.
 
+## Outcome of Milestone 14
+
+- Targeted a free Render Docker Web Service for the backend and Cloudflare
+  Pages Git integration for the frontend.
+- Added `render.yaml` for the `querylens-api` backend using `backend` as the
+  Docker context, the existing Dockerfile, free plan, commit-triggered
+  automatic deploys, and dashboard-supplied `ALLOWED_ORIGINS`.
+- Added `docs/DEPLOYMENT.md` with Blueprint and manual Render methods,
+  Cloudflare Pages build settings, two-pass deployment order, production
+  verification commands, CORS checks, automatic-deploy behavior, and
+  free-tier warnings.
+- Changed backend port precedence to Render `PORT`, existing `SERVER_PORT`,
+  then local port 8080.
+- Preserved comma-separated CORS origins, local defaults, `/api/**` scope,
+  required methods and headers, and disabled credentials.
+- Documented production `ALLOWED_ORIGINS` and build-time
+  `VITE_API_BASE_URL` placeholders without inventing public URLs.
+- Added no database, persistent disk, provider credentials, tokens, secrets,
+  deployment workflow, Workers, Functions, or new application endpoints.
+- Left external provider dashboard actions and live production verification
+  pending.
+
 ## Next milestone
 
-**Milestone 14 — deployment**
+**Milestone 15 — live deployment verification, screenshots, final README
+polish, résumé and LinkedIn material**
 
-Deployment has not started and remains outside the current engineering scope.
+Milestone 15 begins only after the user completes Render and Cloudflare
+dashboard deployment and provides the public URLs.

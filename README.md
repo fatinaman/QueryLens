@@ -352,6 +352,37 @@ The backend image uses a multi-stage Java 21 build and a non-root runtime. The
 frontend image uses a Node 24 build stage and nginx with SPA fallback, gzip,
 no-cache HTML, and immutable caching for hashed assets.
 
+## Deployment
+
+```text
+Live demo: Not deployed yet
+Public API: Not deployed yet
+```
+
+The planned free public deployment uses:
+
+- GitHub for source control and provider-native automatic build triggers
+- Render Web Service for the Spring Boot Docker backend
+- Cloudflare Pages for the static React and Vite frontend
+
+Production configuration:
+
+```text
+Render:
+  ALLOWED_ORIGINS=https://<YOUR-CLOUDFLARE-PAGES-DOMAIN>
+
+Cloudflare Pages:
+  VITE_API_BASE_URL=https://<YOUR-RENDER-BACKEND-DOMAIN>
+```
+
+`VITE_API_BASE_URL` is embedded at frontend build time. Changing it requires a
+new Cloudflare deployment, and it must never contain a secret because
+`VITE_` variables are public browser values.
+
+Free services can have cold starts, resource limits, or temporary
+availability constraints. Follow the complete two-pass provider setup and
+production QA process in [the deployment guide](docs/DEPLOYMENT.md).
+
 ## Continuous integration
 
 The GitHub Actions workflow runs on pushes and pull requests:
@@ -426,9 +457,10 @@ FK columns, but no broken diagram edge is created.
 - [Frontend guide](frontend/README.md)
 - [API contract](docs/API.md)
 - [Project state and milestone history](docs/PROJECT_STATE.md)
+- [Render and Cloudflare deployment guide](docs/DEPLOYMENT.md)
 
 ## Project status
 
-Milestones 1–13 are implemented. Backend and frontend tests, frontend lint,
-and the production frontend build pass. Deployment remains intentionally
-outside the current repository scope.
+Milestones 1–13 are complete. Milestone 14 deployment preparation is
+implemented, but the external Render and Cloudflare dashboard deployment is
+still pending.
