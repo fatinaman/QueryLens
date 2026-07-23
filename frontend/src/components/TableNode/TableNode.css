@@ -1,0 +1,117 @@
+.table-node {
+  width: 310px;
+  overflow: hidden;
+  border: 1px solid #c8cede;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow:
+    0 12px 28px rgba(34, 43, 78, 0.1),
+    0 2px 5px rgba(34, 43, 78, 0.06);
+}
+
+.table-node__header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid #d7dbea;
+  color: #fff;
+  background: #303b70;
+}
+
+.table-node__header strong {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-node__kind {
+  padding: 0.2rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.25rem;
+  color: #dce2ff;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.table-node__columns {
+  background: #fff;
+}
+
+.table-node__column {
+  display: grid;
+  grid-template-columns: 48px minmax(70px, 1fr) minmax(75px, auto) 32px;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.2rem;
+  padding: 0.35rem 0.8rem;
+  border-bottom: 1px solid #edf0f6;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.table-node__column:last-child {
+  border-bottom: 0;
+}
+
+.table-node__badges {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.key-badge {
+  min-width: 18px;
+  padding: 0.13rem 0.2rem;
+  border-radius: 0.2rem;
+  text-align: center;
+  font-size: 0.52rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.key-badge--primary {
+  color: #624300;
+  background: #ffe9a8;
+}
+
+.key-badge--foreign {
+  color: #194a42;
+  background: #c9eee7;
+}
+
+.table-node__column-name {
+  overflow: hidden;
+  color: #242b43;
+  font-weight: 700;
+  text-overflow: ellipsis;
+}
+
+.table-node__column-type {
+  overflow: hidden;
+  color: #59617a;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-node__nullable {
+  color: #8a91a5;
+  font-size: 0.52rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.table-node__handle {
+  width: 9px;
+  height: 9px;
+  border: 2px solid #fff;
+  background: #5267a8;
+}
+
+.react-flow__node.selected .table-node {
+  border-color: #596fbd;
+  box-shadow: 0 0 0 3px rgba(82, 103, 168, 0.16);
+}

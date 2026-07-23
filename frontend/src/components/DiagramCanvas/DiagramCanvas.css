@@ -1,0 +1,138 @@
+.diagram-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.diagram-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.diagram-panel__heading h2 {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+}
+
+.diagram-panel__count {
+  padding: 0.38rem 0.65rem;
+  border-radius: 999px;
+  color: #31405f;
+  background: #e8ebf5;
+  font-size: 0.74rem;
+  font-weight: 750;
+}
+
+.diagram-panel__canvas {
+  position: relative;
+  min-height: 650px;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid #d7dce8;
+  border-radius: var(--radius-md);
+  background: #f7f8fc;
+}
+
+.diagram-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.diagram-empty__mark {
+  position: relative;
+  width: 92px;
+  height: 64px;
+  margin: 0 auto 1.25rem;
+}
+
+.diagram-empty__mark span {
+  position: absolute;
+  width: 42px;
+  height: 26px;
+  border: 1px solid #aeb7cf;
+  border-radius: 0.3rem;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(46, 58, 102, 0.08);
+}
+
+.diagram-empty__mark span:nth-child(1) {
+  top: 0;
+  left: 0;
+}
+
+.diagram-empty__mark span:nth-child(2) {
+  right: 0;
+  bottom: 0;
+}
+
+.diagram-empty__mark span:nth-child(3) {
+  top: 22px;
+  left: 25px;
+  z-index: -1;
+  width: 44px;
+  height: 1px;
+  border: 0;
+  background: #8795bc;
+  transform: rotate(23deg);
+}
+
+.diagram-empty h3 {
+  margin: 0 0 0.45rem;
+  color: var(--text-strong);
+  font-size: 1rem;
+}
+
+.diagram-empty p {
+  max-width: 360px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.diagram-panel .react-flow__controls {
+  overflow: hidden;
+  border: 1px solid #d5d9e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 5px 14px rgba(43, 52, 87, 0.12);
+}
+
+.diagram-panel .react-flow__controls-button {
+  border-bottom-color: #e3e6ef;
+  background: #fff;
+}
+
+.diagram-panel .react-flow__edge-textbg {
+  stroke: #d9deeb;
+}
+
+@media (max-width: 960px) {
+  .diagram-panel__canvas {
+    min-height: 540px;
+  }
+}
+
+@media (max-width: 640px) {
+  .diagram-panel {
+    padding: 1.1rem;
+  }
+
+  .diagram-panel__canvas {
+    min-height: 500px;
+  }
+
+  .diagram-minimap {
+    display: none;
+  }
+}
